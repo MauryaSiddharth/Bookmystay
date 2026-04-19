@@ -5,7 +5,11 @@ import mongoose from 'mongoose';
 import userRoutes from './routes/users.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import cookieParser from "cookie-parser"
+import path from 'path'
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cookieParser())
@@ -15,6 +19,8 @@ app.use(cors({
   origin:process.env.FRONTEND_URL,
   credentials:true,
 }))
+
+  app.use(express.static(path.join(__dirname,"../../frontend/dist")));
 
 app.use('/api/auth',authRoutes)
 app.use('/api/users',userRoutes)

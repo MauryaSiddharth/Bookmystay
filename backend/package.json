@@ -4,7 +4,9 @@
   "main": "./src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --exec tsx src/index.ts"
+    "dev": "nodemon --exec tsx src/index.ts",
+    "build":"npm install && npx tsc",
+    "start":"node ./dist/index.js "
   },
   "author": "",
   "license": "ISC",
