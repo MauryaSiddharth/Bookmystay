@@ -25,7 +25,7 @@ app.use(cors({
 app.use('/api/auth',authRoutes)
 app.use('/api/users',userRoutes)
 
-app.get("*", (req: Request, res: Response) => {
+app.get(/(.*)/, (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
 });
 const connectDB= async ()=>{
