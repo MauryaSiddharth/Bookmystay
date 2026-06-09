@@ -1,0 +1,31 @@
+import { useMutation } from "@tanstack/react-query"
+import ManageHotelForm from "../forms/ManageHotelForm/ManageHotelForm"
+import { useAppContext } from "../contexts/AppContext";
+import * as apiClient from '../api-client'
+
+const AddHotel = () => {
+    const { showToast } = useAppContext();
+    
+    // 1. Wrap arguments into a single object
+    // 2. Change 'isLoading' to 'isPending' for v5 compatibility
+    const { mutate, isPending } = useMutation({
+        mutationFn: apiClient.addMyHotel,
+        onSuccess: () => {
+            showToast({ message: "Hotel Saved ", type: "SUCCESS" })
+        },
+        onError: () => {
+            showToast({ message: "Error Saving Hotel", type: "ERROR" })
+        }
+    })
+
+    const handleSave = (hotelFormData: FormData) => {
+        mutate(hotelFormData)
+    }
+
+    return (
+        // Pass the updated 'isPending' state down to your form
+        <ManageHotelForm onSave={handleSave} isLoading={isPending} />
+    )
+}
+
+export default AddHotel

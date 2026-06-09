@@ -3,7 +3,11 @@ import './App.css'
 import Layout from './Layout/Layout'
 import Register from './pages/Register'
 import SignIn from './pages/SignIn'
+import AddHotel from './pages/AddHotel'
+import { useAppContext } from './contexts/AppContext'
 function App() {
+  // 
+  const {isLoggedIn} = useAppContext();
   return (
       
         <Routes>
@@ -24,6 +28,16 @@ function App() {
                 <Layout>
                   <SignIn/>
               </Layout>} />
+
+
+              {/*  write logic for admin only  */}
+              {isLoggedIn && <>
+                 <Route path='/add-hotel'  element={
+                  <Layout>
+                    <AddHotel/>
+                  </Layout>
+                 } />
+              </> }
 
                <Route path='*' element={<Navigate to="/" />} />
         </Routes>
