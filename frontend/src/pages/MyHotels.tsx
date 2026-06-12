@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { data, Link } from "react-router-dom";
+import {  Link } from "react-router-dom";
  import {BsBuilding, BsMap} from 'react-icons/bs'
 import * as apiClient from "../api-client";
 import { BiHotel, BiMoney, BiStar } from "react-icons/bi";
