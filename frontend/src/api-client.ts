@@ -1,4 +1,4 @@
-import type { HotelType } from './../../backend/src/models/hotel.model';
+import type { HotelType } from './../../backend/src/shared/types';
 import type { RegisterFormData } from "./pages/Register";
 import type { SignInFormData } from "./pages/SignIn";
 
