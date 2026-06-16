@@ -93,7 +93,11 @@ const hotels = await Hotel.find({userId:req.userId})
 
 
 router.get('/:id',verifyToken,async(req:Request,res:Response)=>{
-    const id  = req.params.id.toString();
+    const id = req.params.id;
+    if (!id) {
+        return res.status(400).json({ message: "Hotel ID is required" });
+    }
+    
    
     try {
         const hotel = await Hotel.findOne({
@@ -120,21 +124,31 @@ router.put('/:id',
     },
     async (req: Request, res: Response) => {
         try {
-            const updatedHotel: HotelType = req.body;
-            updatedHotel.lastUpdated = new Date();
+            const hotelId = req.params.id;
+            if (!hotelId) {
+                return res.status(400).json({ message: "Hotel ID is required" });
+            }
 
-            const hotel = await Hotel.findOneAndUpdate(
-                {
-                    _id: req.params.id,
-                    userId: req.userId,
-                },
-                updatedHotel,
-                { new: true }
-            );
+            const hotel = await Hotel.findOne({
+                _id: hotelId,
+                userId: req.userId,
+            });
 
             if (!hotel) {
                 return res.status(404).json({ message: "Hotel not found" });
             }
+
+            hotel.name = req.body.name;
+            hotel.city = req.body.city;
+            hotel.country = req.body.country;
+            hotel.description = req.body.description;
+            hotel.type = req.body.type;
+            hotel.pricePerNight = req.body.pricePerNight;
+            hotel.facilities = req.body.facilities;
+            hotel.adultCount = req.body.adultCount;
+            hotel.childCount = req.body.childCount;
+            hotel.starRating = req.body.starRating;
+            hotel.lastUpdated = new Date();
 
             const files = req.files as Express.Multer.File[];
             const uploadPromises = files.map(async (image) => {
