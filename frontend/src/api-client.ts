@@ -1,4 +1,4 @@
-import type { HotelType } from './../../backend/src/shared/types';
+import type { HotelSearchResponse, HotelType } from './../../backend/src/shared/types';
 import type { RegisterFormData } from "./pages/Register";
 import type { SignInFormData } from "./pages/SignIn";
 
@@ -17,6 +17,8 @@ export const register = async(FormData:RegisterFormData)=>{
          if(!response.ok){
             throw new Error(responseBody.message);
          }
+
+         return responseBody;
 
 }
 
@@ -120,3 +122,46 @@ export const updateMyHotelById = async ({
 
    return response.json();
 };
+
+export type SearchParams={
+   destination? :string;
+   checkIn?:string;
+   checkOut?:string;
+   adultCount?:string;
+   childCount?:string;
+   page?:string;
+   facilities?:string[];
+   types?:string[];
+   stars?:string[];
+   maxPrice?:string;
+   sortOptions?:string;
+}
+
+export const searchHotels = async(searchParams: SearchParams) : Promise<HotelSearchResponse> =>{
+   const queryParams = new URLSearchParams();
+   queryParams.append("destination",searchParams.destination || '');
+      queryParams.append("checkIn",searchParams.checkIn || '');
+   queryParams.append("checkOut",searchParams.checkOut || '');
+   queryParams.append("adultCount",searchParams.adultCount || '');
+  queryParams.append("childCount",searchParams.childCount || '');
+     queryParams.append("page",searchParams.page || '');
+    
+     queryParams.append("maxPrice",searchParams.maxPrice|| "");
+     queryParams.append("sortOptions",searchParams.sortOptions || "");
+
+    searchParams.facilities?.forEach((facility)=>
+       queryParams.append("facilities",facility)
+   );
+
+   searchParams.types?.forEach((type)=>queryParams.append("types",type))
+   searchParams.stars?.forEach((star)=>queryParams.append("stars",star))
+   
+
+     const response = await  fetch (`${API_BASE_URL}/api/hotels/search?${queryParams}`)
+
+     if(!response.ok){
+      throw new Error("Error fetching hotels")
+     }
+
+     return response.json();
+}
