@@ -75,7 +75,7 @@ maxDate.setFullYear(maxDate.getFullYear()+1);
         <div>
             <DatePicker 
             selected={checkIn}
-             onChange={(date)=>setCheckIn(date as Date)}
+             onChange={(date:Date | null)=>setCheckIn(date as Date)}
              selectsStart
              startDate={checkIn}
              endDate={checkOut}
@@ -90,7 +90,7 @@ maxDate.setFullYear(maxDate.getFullYear()+1);
          <div>
             <DatePicker 
             selected={checkOut}
-             onChange={(date)=>setCheckOut(date as Date)}
+             onChange={(date:Date |null)=>setCheckOut(date as Date)}
              selectsStart
              startDate={checkIn}
              endDate={checkOut}

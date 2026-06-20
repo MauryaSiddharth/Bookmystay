@@ -32,7 +32,7 @@ const [selectedFacilities,setSelectedFacilities] = useState<string[]>([])
     sortOptions,
   };
 
-  const { data: hotelData, isLoading, error } = useQuery({
+  const { data: hotelData } = useQuery({
     queryKey: ["searchHotels", searchParams],
     queryFn: () => apiClient.searchHotels(searchParams),
   });
