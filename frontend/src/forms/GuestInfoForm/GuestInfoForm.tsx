@@ -48,7 +48,7 @@ maxDate.setFullYear(maxDate.getFullYear()+1);
       search.saveSearchValues(
         "",
         data.checkIn,
-        data.checkIn,
+        data.checkOut,
         data.adultCount,
         data.childCount
     )
@@ -59,7 +59,7 @@ maxDate.setFullYear(maxDate.getFullYear()+1);
       search.saveSearchValues(
         "",
         data.checkIn,
-        data.checkIn,
+        data.checkOut,
         data.adultCount,
         data.childCount
     )

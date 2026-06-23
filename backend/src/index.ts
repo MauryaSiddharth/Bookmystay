@@ -10,6 +10,7 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 import {v2 as cloudinary}  from 'cloudinary'
 import hotelRoutes from "./routes/hotels.routes.js"
+import bodyParser from 'body-parser';
 
 const {
   CLOUDINARY_CLOUD_NAME,
@@ -32,17 +33,34 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+app.use(bodyParser.json());
 
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-app.use(cors({
-  origin:process.env.FRONTEND_URL,
-  credentials:true,
-}))
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://localhost:5174"
+].filter(Boolean) as string[];
 
-  app.use(express.static(path.join(__dirname,"../../frontend/dist")));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
+app.use(express.static(path.join(__dirname,"../../frontend/dist")));
 
 app.use('/api/auth',authRoutes)
 app.use('/api/users',userRoutes)
@@ -76,5 +94,3 @@ const connectDB= async ()=>{
 }
 
 connectDB();
- 
-

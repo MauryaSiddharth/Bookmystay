@@ -3,9 +3,27 @@ import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { check, validationResult } from 'express-validator';
+import verifyToken from '../middleware/auth.js';
 dotenv.config();
 
 const router = express.Router();
+
+router.get("/me",verifyToken,async(req:Request,res:Response)=>{
+     const userId = req.userId;
+
+     try {
+        const user = await User.findById(userId).select("-password");
+        if(!user){
+            return res.status(500).json({message:"User not found"})
+        }
+        res.json(user)
+        
+     } catch (error) {
+         console.log(error);
+         res.status(500).json({message:"Something went wrong"})        
+     }
+     
+})
 
 router.post('/register', [
      check("firstname","first name is string").isString(),

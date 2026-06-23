@@ -1,7 +1,13 @@
 import express ,{type Request, type Response }from 'express'
 import Hotel from '../models/hotel.model.js';
-import type { HotelSearchResponse } from '../shared/types.js';
+import type { HotelSearchResponse, BookingType, HotelType } from '../shared/types.js';
 import { param, validationResult } from 'express-validator';
+import verifyToken from '../middleware/auth.js';
+import  Stripe from "stripe";
+
+
+const stripe = new Stripe(process.env.STRIPE_API_KEY as string);
+
 
 const router = express.Router();
 
@@ -59,6 +65,32 @@ router.get('/search',async(req:Request,res:Response)=>{
     }
 })
 
+router.get("/my-bookings", verifyToken, async (req: Request, res: Response) => {
+  try {
+    const hotels = await Hotel.find({
+      bookings: { $elemMatch: { userId: req.userId } },
+    });
+
+    const results = hotels.map((hotel) => {
+      const userBookings = hotel.bookings.filter(
+        (booking: any) => booking.userId === req.userId
+      );
+
+      const hotelWithUserBookings: HotelType = {
+        ...hotel.toObject(),
+        bookings: userBookings,
+      };
+
+      return hotelWithUserBookings;
+    });
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Unable to fetch bookings" });
+  }
+});
+
 router.get(
   "/:id",
   [param("id").notEmpty().withMessage("Hotel ID is required")
@@ -76,12 +108,102 @@ router.get(
   } catch (error) {
     console.log(error)
     res.status(500).json({error:"Error fetching hotel"})
-    
   }
 
 })
 
-   // 
+router.post(
+  '/:hotelId/bookings/payment-intent',
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const { numberOfNights } = req.body;
+      const hotelId = req.params.hotelId as string;
+
+      const hotel = await Hotel.findById(hotelId);
+      if (!hotel) {
+        return res.status(400).json({ message: "Hotel not found" });
+      }
+
+      const totalCost = hotel.pricePerNight * parseInt(numberOfNights);
+
+      let stripeAmount = totalCost * 100;
+      if (stripeAmount < 5000) {
+        stripeAmount = 5000; // Enforce minimum amount equivalent to 50 cents (₹50.00 / 5000 paise in INR)
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: stripeAmount,
+        currency: "inr",
+        metadata: {
+          hotelId,
+          userId: req.userId,
+        },
+      });
+
+      if (!paymentIntent.client_secret) {
+        return res.status(500).json({ message: "Error creating payment intent" });
+      }
+
+      const response = {
+        paymentIntentId: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret.toString(),
+        totalCost,
+      };
+
+      res.send(response);
+    } catch (error: any) {
+      console.log(error);
+      res.status(500).json({ message: error.message || "Something went wrong" });
+    }
+  }
+);
+
+router.post('/:hotelId/bookings',verifyToken,async(req:Request,res:Response)=>{
+  try {
+    const paymentIntentId= req.body.paymentIntentId;
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId as string)
+    
+    if(!paymentIntent){
+      return res.status(400).json({message:"payment intent not found"})
+    }
+
+    if(paymentIntent.metadata.hotelId!== req.params.hotelId || paymentIntent.metadata.userId !==req.userId ){
+       return res.status(400).json({message:"payment intent mismatch"})
+    }
+
+    if(paymentIntent.status!== "succeeded"){
+      return res.status(400).json({message:`payment intent not succeeded.Status:${paymentIntent.status}`})
+    }
+
+    const newBooking : BookingType={
+      ...req.body,
+      userId:req.userId
+
+    };
+    const hotel = await Hotel.findById(req.params.hotelId);
+    if (!hotel) {
+      return res.status(400).json({ message: "hotel not found" });
+    }
+
+    if (!hotel.bookings) {
+      hotel.bookings = [];
+    }
+    hotel.bookings.push(newBooking);
+    await hotel.save();
+
+    res.status(200).send();
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({message:"something went wrong"})
+    
+  }
+})
+
+
+
 const constructSearchQuery = (queryParams: any) => {
   let constructedQuery: any = {};
 
@@ -130,13 +252,11 @@ const constructSearchQuery = (queryParams: any) => {
 
   if (queryParams.maxPrice) {
     constructedQuery.pricePerNight = {
-      $lte: parseInt(queryParams.maxPrice).toString(),
+      $lte: parseInt(queryParams.maxPrice),
     };
   }
 
   return constructedQuery;
 };
-
-
 
 export default router;
