@@ -68,9 +68,19 @@ app.use('/api/my-hotels',myHotelRoutes)
 app.use('/api/hotels',hotelRoutes)
 
 
-app.get(/(.*)/, (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
+app.get(/(.*)/, (req: Request, res: Response, next: any) => {
+  res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"), (err) => {
+    if (err) {
+      next(err);
+    }
+  });
 });
+
+app.use((err: any, req: Request, res: Response, next: any) => {
+  console.error("❌ Express Error:", err);
+  res.status(500).json({ error: err.message || "Internal Server Error" });
+});
+
 const connectDB= async ()=>{
       try {
         if(!process.env.MONGO_URI){
