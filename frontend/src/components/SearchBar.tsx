@@ -34,7 +34,7 @@ maxDate.setFullYear(maxDate.getFullYear()+1);
     onSubmit={handelSubmit}
      className="-mt-8 p-3 bg-orange-400 rounded shadow-md grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 items-center gap-4"
      >
-        <div className="flex flex-row items-center flex-1 bg-white p-2">
+        <div className="flex flex-row items-center flex-1 bg-white p-2 h-11 rounded-md">
               <MdTravelExplore size={25} className="mr-2" />
               <input 
               placeholder="Where are you going? " 
@@ -45,7 +45,7 @@ maxDate.setFullYear(maxDate.getFullYear()+1);
 
         </div>
 
-        <div className="flex bg-white px-2 py-1 gap-2">
+        <div className="flex bg-white px-2 py-1 gap-2 h-11 rounded-md">
             <label className="items-center flex">
                 Adult:
                 <input
@@ -72,7 +72,7 @@ maxDate.setFullYear(maxDate.getFullYear()+1);
 
         </div>
 
-        <div>
+        <div  className="bg-white rounded-md px-3 py-2 h-11 flex items-center">
             <DatePicker 
             selected={checkIn}
              onChange={(date:Date | null)=>setCheckIn(date as Date)}
@@ -87,7 +87,7 @@ maxDate.setFullYear(maxDate.getFullYear()+1);
             />
         </div>
 
-         <div>
+         <div  className="bg-white rounded-md px-3 py-2 h-11 flex items-center">
             <DatePicker 
             selected={checkOut}
              onChange={(date:Date |null)=>setCheckOut(date as Date)}
