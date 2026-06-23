@@ -49,15 +49,31 @@ const allowedOrigins = [
   "http://localhost:5174"
 ].filter(Boolean) as string[];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+app.use(cors((req, callback) => {
+  const origin = req.header('Origin');
+  const host = req.header('Host');
+  
+  let isAllowed = false;
+  if (!origin) {
+    isAllowed = true;
+  } else if (allowedOrigins.includes(origin)) {
+    isAllowed = true;
+  } else {
+    try {
+      const originUrl = new URL(origin);
+      if (originUrl.host === host) {
+        isAllowed = true;
+      }
+    } catch (e) {
+      // Ignored
     }
-  },
-  credentials: true,
+  }
+
+  if (isAllowed) {
+    callback(null, { origin: true, credentials: true });
+  } else {
+    callback(new Error('Not allowed by CORS'));
+  }
 }));
 
 app.use(express.static(path.join(__dirname,"../../frontend/dist")));
