@@ -5,6 +5,7 @@ node_modules/
 # Environment files
 .env
 .env.*
+interview.env
 
 # Logs
 logs
